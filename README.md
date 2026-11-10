@@ -86,8 +86,8 @@ Project Link: [https://github.com/lznostalgia/dobromobilus-telegramus-botus/](ht
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* []()
-* []()
+* [Choose an Open Source License](https://choosealicense.com)
+* [README Template](https://github.com/othneildrew/Best-README-Template/)
 * []()
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
