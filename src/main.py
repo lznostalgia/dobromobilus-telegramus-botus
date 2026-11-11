@@ -9,6 +9,8 @@ from aiogram.types import Message
 
 #Modules
 import config
+#import database
+#import handlers
 
 #Below is a sample configuration from https://aiogram.dev/
 
@@ -27,11 +29,20 @@ async def echo(message: Message) -> None:
     except TypeError:
         await message.answer("Nice try!")
 
-async def main() -> None:
-    bot = Bot(config.get_bot_token())
+async def main(token=None) -> None:
+    """
+    Main function to spool things up.
+    Attempts to read a Telegram bot token:
+        * optionally from function argument (debug),
+        * or from the environment.
+    """
+    if token == None:
+        token = config.get_bot_token()
+
+    bot = Bot()
     await dp.start_polling(bot)
 
-    #TODO, A STUB
+    #TODO
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
