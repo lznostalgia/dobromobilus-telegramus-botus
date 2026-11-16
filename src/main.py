@@ -1,33 +1,34 @@
-#Standard libraries
 import asyncio
-import logging
 
-#Telegram
 from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.fsm.storage.memory import MemoryStorage
 
-#Modules
-from config import BOT_TOKEN
-#from db.database import Database
-from tgbot.handlers.sample import router
+from config import BOT_TOKEN, DATABASE_URL
 
-async def main() -> None:
-    #db = Database()
+from db.database import Database
+
+from tgbot.handlers.user import router as user_router
+from tgbot.handlers.admin import router as admin_router
+
+
+async def main():
+    db = Database(DATABASE_URL)
     bot = Bot(token=BOT_TOKEN)
-    dp = Dispatcher()
 
-    dp.include_router(router)
+    dp = Dispatcher(storage=MemoryStorage())
 
-    #Yoink
+    dp.include_router(user_router)
+    dp.include_router(admin_router)
+
     try:
-        await dp.start_polling(bot)
+        await db.create_tables()
+
+        await dp.start_polling(bot, db=db)
 
     finally:
-        """await db.close()""" # REMOVE BEFORE FLIGHT
+        await db.close()
         await bot.session.close()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())

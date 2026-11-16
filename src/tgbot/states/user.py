@@ -1,10 +1,10 @@
-from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.state import StatesGroup, State
 
 
-
-class UserFlow(StatesGroup):
-  "Машина состояний обычного пользователя: Вид Питомца, Город, Выбор Питомца, Подтверждение Заявки"
-  choosing_species = State()
-  choosing_city = State()
-  choosing_pet = State()
-  confirming = State()
+class UserStates(StatesGroup):
+    choosing_animal_type = State()
+    choosing_city = State()
+    choosing_shelter = State()
+    choosing_pet = State()
+    viewing_pet = State()
+    confirming_application = State()
