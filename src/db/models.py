@@ -65,3 +65,14 @@ class Application(Base):
     )
 
     pet: Mapped["Pet"] = relationship(back_populates="applications")
+
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    telegram_id: Mapped[int] = mapped_column(
+        BigInteger,
+        unique=True,
+        index=True,
+    )

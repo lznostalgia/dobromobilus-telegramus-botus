@@ -1,36 +1,52 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from .models import Applications, Fosters, Pets
-
+from .models import Application, Shelter, Pet
 
 
 async def get_animal_types(session: AsyncSession) -> list[str]:
     result = await session.scalars(
-        select(Pets.animal_type)
+        select(Pet.animal_type)
+        .where(Pet.is_available.is_(True))
         .distinct()
-        .order_by(Pets.animal_type)
+        .order_by(Pet.animal_type)
     )
     return list(result)
 
 
-async def get_cities(session: AsyncSession) -> list[str]:
+async def get_cities(
+    session: AsyncSession,
+    animal_type: str,
+) -> list[str]:
     result = await session.scalars(
-        select(Fosters.city)
+        select(Shelter.city)
+        .join(Shelter.pets)
+        .where(
+            Pet.animal_type == animal_type,
+            Pet.is_available.is_(True),
+        )
         .distinct()
-        .order_by(Fosters.city)
+        .order_by(Shelter.city)
     )
     return list(result)
 
 
-async def get_fosters(
+async def get_shelters(
     session: AsyncSession,
     city: str,
-) -> list[Fosters]:
+    animal_type: str,
+) -> list[Shelter]:
     result = await session.scalars(
-        select(Fosters)
-        .where(Fosters.city == city)
-        .order_by(Fosters.id)
+        select(Shelter)
+        .join(Shelter.pets)
+        .where(
+            Shelter.city == city,
+            Pet.animal_type == animal_type,
+            Pet.is_available.is_(True),
+        )
+        .distinct()
+        .order_by(Shelter.id)
     )
     return list(result)
 
@@ -39,21 +55,41 @@ async def get_pets(
     session: AsyncSession,
     shelter_id: int,
     animal_type: str,
-) -> list[Pets]:
+) -> list[Pet]:
     result = await session.scalars(
-        select(Pets)
+        select(Pet)
         .where(
-            Pets.shelter_id == shelter_id,
-            Pets.animal_type == animal_type,
-            Pets.is_available.is_(True),
+            Pet.shelter_id == shelter_id,
+            Pet.animal_type == animal_type,
+            Pet.is_available.is_(True),
         )
-        .order_by(Pets.id)
+        .order_by(Pet.id)
     )
     return list(result)
 
 
-async def get_applications(session: AsyncSession) -> list[Applications]:
+async def get_pet(
+    session: AsyncSession,
+    pet_id: int,
+) -> Pet | None:
+    return await session.scalar(
+        select(Pet)
+        .options(selectinload(Pet.shelter))
+        .where(Pet.id == pet_id)
+    )
+
+
+async def get_applications(
+    session: AsyncSession,
+    limit: int = 20,
+) -> list[Application]:
     result = await session.scalars(
-        select(Applications).order_by(Applications.created_at.desc())
+        select(Application)
+        .options(
+            selectinload(Application.pet)
+            .selectinload(Pet.shelter)
+        )
+        .order_by(Application.created_at.desc())
+        .limit(limit)
     )
     return list(result)
